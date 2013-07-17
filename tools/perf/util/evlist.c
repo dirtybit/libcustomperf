@@ -23,6 +23,8 @@
 #include <linux/bitops.h>
 #include <linux/hash.h>
 
+#include "libcustomperf/libcustomperf.h"
+
 #define FD(e, x, y) (*(int *)xyarray__entry(e->fd, x, y))
 #define SID(e, x, y) xyarray__entry(e->sample_id, x, y)
 
@@ -753,8 +755,21 @@ int perf_evlist__prepare_workload(struct perf_evlist *evlist,
 				  const char *argv[], bool pipe_output,
 				  bool want_signal)
 {
-	int child_ready_pipe[2], go_pipe[2];
+	int child_ready_pipe[2], go_pipe[2], control_socket[2];
 	char bf;
+
+	if (socketpair(AF_UNIX, SOCK_STREAM, 0, control_socket) == -1) {
+		perror("failed to create control communication socket");
+		return -1;
+	}
+	/* dirtybit
+	 * Establish two-way communication channel between perf and the binary through a socket pair
+	 * Keep perf's end to communicate with the binary
+	 * FD of the workload's socket is dupped to a certain descriptor so as to be known in API calls in the workload. (Ugly) !!!This needs to be replaced with a better solution.
+	 */
+	target->comm_sck = control_socket[0];
+	close(TARGET_SOCK_FD);
+	dup2(control_socket[1], TARGET_SOCK_FD);
 
 	if (pipe(child_ready_pipe) < 0) {
 		perror("failed to create 'ready' pipe");

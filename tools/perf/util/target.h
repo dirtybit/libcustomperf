@@ -12,6 +12,7 @@ struct perf_target {
 	uid_t	     uid;
 	bool	     system_wide;
 	bool	     uses_mmap;
+	int          comm_sck;
 };
 
 enum perf_target_errno {
