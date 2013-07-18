@@ -10,11 +10,10 @@ pthread_attr_t comm_thread_attr;
 void *perf_comm__handler(void *arg)
 {
 	int cmd = -918;
-	struct perf_record *rec = (struct perf_record *) arg;
-	struct perf_evlist *evsel_list = rec->evlist;
-	int fd = rec->opts.target.comm_sck;
+	struct perf_handler_arg *handler_arg = (struct perf_handler_arg *) arg;
+	struct perf_evlist *evsel_list = handler_arg->evlist;
+	int fd = handler_arg->target->comm_sck;
 	while (1) {
-		printf("waiting\n");
 		if (read(fd, &cmd, sizeof(cmd)) == -1) {
 			perror("Can't read command from the workload");
 			return NULL;
@@ -25,13 +24,11 @@ void *perf_comm__handler(void *arg)
 			printf("perf_comm: init communication\n");
 			break;
 		case LIBCUSTOMPERF_START_MONITORING:
-			if (rec->opts.selective)
-				perf_evlist__enable(evsel_list);
+			perf_evlist__enable(evsel_list);
 			printf("perf_comm: start monitoring\n");
 			break;
 		case LIBCUSTOMPERF_STOP_MONITORING:
-			if (rec->opts.selective)
-				perf_evlist__disable(evsel_list);
+			perf_evlist__disable(evsel_list);
 			printf("perf_comm: stop monitoring\n");
 			break;
 		default:
@@ -47,12 +44,12 @@ void *perf_comm__handler(void *arg)
 	return 0;
 }
 
-int perf_comm__start_handler(struct perf_record *rec)
+int perf_comm__start_handler(struct perf_handler_arg *arg)
 {
 	int rc;
 	pthread_attr_init(&comm_thread_attr);
 
-	rc = pthread_create(&comm_thread, &comm_thread_attr, perf_comm__handler, (void *)rec);
+	rc = pthread_create(&comm_thread, &comm_thread_attr, perf_comm__handler, (void *)arg);
 	if (rc) {
 		printf("ERROR; return code from pthread_create() is %d\n", rc);
 		return -1;

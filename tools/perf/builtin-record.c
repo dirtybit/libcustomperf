@@ -457,8 +457,13 @@ static int __cmd_record(struct perf_record *rec, int argc, const char **argv)
 		}
 
 		/* dirtybit: Dispatch a thread to listen API calls coming from the workload */
-		if (opts->selective)
-			perf_comm__start_handler(rec);
+		if (opts->selective) {
+			struct perf_handler_arg handler_arg = {
+					.evlist = rec->evlist,
+					.target = &opts->target
+			};
+			perf_comm__start_handler(&handler_arg);
+		}
 	}
 
 	if (perf_record__open(rec) != 0) {
