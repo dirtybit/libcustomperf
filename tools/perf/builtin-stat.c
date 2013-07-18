@@ -56,6 +56,7 @@
 #include "util/cpumap.h"
 #include "util/thread.h"
 #include "util/thread_map.h"
+#include "util/perf_comm.h"
 
 #include <stdlib.h>
 #include <sys/prctl.h>
@@ -477,6 +478,15 @@ static int __run_perf_stat(int argc, const char **argv)
 		error("failed to set filter with %d (%s)\n", errno,
 			strerror(errno));
 		return -1;
+	}
+
+	if (selective){
+		struct perf_handler_arg handler_arg = {
+				.evlist = evsel_list,
+				.target = &target
+		};
+		perf_evlist__disable(evsel_list);
+		perf_comm__start_handler(&handler_arg);
 	}
 
 	/*
