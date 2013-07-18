@@ -66,7 +66,7 @@ int test__task_exit(void)
 		goto out_delete_maps;
 	}
 
-	err = perf_evlist__prepare_workload(evlist, &target, argv, false, true);
+	err = perf_evlist__prepare_workload(evlist, &target, argv, false, true, false);
 	if (err < 0) {
 		pr_debug("Couldn't run the workload!\n");
 		goto out_delete_maps;

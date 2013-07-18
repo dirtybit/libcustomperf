@@ -436,7 +436,7 @@ static int __run_perf_stat(int argc, const char **argv)
 
 	if (forks) {
 		if (perf_evlist__prepare_workload(evsel_list, &target, argv,
-						  false, false) < 0) {
+						  false, false, selective) < 0) {
 			perror("failed to prepare workload");
 			return -1;
 		}

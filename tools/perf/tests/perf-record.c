@@ -94,7 +94,7 @@ int test__PERF_RECORD(void)
 	 * on all the fds) and then mmap them.
 	 */
 	err = perf_evlist__prepare_workload(evlist, &opts.target, argv,
-					    false, false);
+					    false, false, false);
 	if (err < 0) {
 		pr_debug("Couldn't run the workload!\n");
 		goto out_delete_maps;
