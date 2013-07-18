@@ -104,6 +104,7 @@ static bool			forever				= false;
 static struct timespec		ref_time;
 static struct cpu_map		*aggr_map;
 static int			(*aggr_get_id)(struct cpu_map *m, int cpu);
+static bool			selective			= false;
 
 static volatile int done = 0;
 
@@ -1371,7 +1372,9 @@ int cmd_stat(int argc, const char **argv, const char *prefix __maybe_unused)
 	OPT_INCR('d', "detailed", &detailed_run,
 		    "detailed run - start a lot of events"),
 	OPT_BOOLEAN('S', "sync", &sync_run,
-		    "call sync() before starting a run"),
+			"call sync() before starting a run"),
+	OPT_BOOLEAN('s', "selective", &selective,
+			"Selective monitoring"),
 	OPT_CALLBACK_NOOPT('B', "big-num", NULL, NULL, 
 			   "print large numbers with thousands\' separators",
 			   stat__set_big_num),
