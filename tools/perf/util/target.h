@@ -3,6 +3,7 @@
 
 #include <stdbool.h>
 #include <sys/types.h>
+#include <linux/list.h>
 
 struct perf_target {
 	const char   *pid;
@@ -13,6 +14,13 @@ struct perf_target {
 	bool	     system_wide;
 	bool	     uses_mmap;
 	int          comm_sck;
+	struct list_head regions;
+};
+
+struct perf_region_definition {
+	char 	*label;
+	int		rd;
+	struct list_head list;
 };
 
 enum perf_target_errno {
@@ -62,5 +70,9 @@ static inline bool perf_target__none(struct perf_target *target)
 {
 	return !perf_target__has_task(target) && !perf_target__has_cpu(target);
 }
+
+void perf_target__add_region(struct perf_target *target, struct perf_region_definition *reg_def);
+void perf_target__del_region(struct perf_target *target, struct perf_region_definition *reg_def);
+
 
 #endif /* _PERF_TARGET_H */

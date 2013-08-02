@@ -162,6 +162,10 @@ int sysctl_perf_event_paranoid __read_mostly = 1;
 /* Minimum for 512 kiB + 1 user control page */
 int sysctl_perf_event_mlock __read_mostly = 512 + (PAGE_SIZE / 1024); /* 'free' kiB per user */
 
+/* current region */
+static int perf_current_region = -1;
+static int perf_last_region = 0;
+
 /*
  * max perf event sample rate
  */
@@ -3375,6 +3379,32 @@ static long perf_ioctl(struct file *file, unsigned int cmd, unsigned long arg)
 
 	case PERF_EVENT_IOC_SET_FILTER:
 		return perf_event_set_filter(event, (void __user *)arg);
+
+	case PERF_EVENT_IOC_SET_REGION:
+		perf_current_region = *((int __user *)arg);
+		return 0;
+
+	case PERF_EVENT_IOC_GET_REGION:
+	{
+		int * user_region = (int __user *)arg;
+		*user_region = perf_current_region;
+		return 0;
+	}
+
+	case PERF_EVENT_IOC_UNSET_REGION:
+		printk("Called with cmd = %d current %d\n", cmd, perf_current_region);
+		perf_current_region = -1;
+		printk("Called with cmd = %d current %d\n", cmd, perf_current_region);
+		return 0;
+
+	case PERF_EVENT_IOC_REG_REGION:
+	{	
+		int * next_region = (int __user *)arg;
+		++perf_last_region;
+		*next_region = perf_last_region;
+		printk("Called with cmd = %d perf_last %d next %d\n", cmd, perf_last_region, *next_region);
+		return 0;
+	}
 
 	default:
 		return -ENOTTY;

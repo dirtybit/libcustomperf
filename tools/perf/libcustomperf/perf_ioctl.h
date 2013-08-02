@@ -1,0 +1,11 @@
+#include <linux/ioctl.h>
+#define PERF_EVENT_IOC_ENABLE           _IO ('$', 0)
+#define PERF_EVENT_IOC_DISABLE          _IO ('$', 1)
+#define PERF_EVENT_IOC_REFRESH          _IO ('$', 2)
+#define PERF_EVENT_IOC_RESET            _IO ('$', 3)
+#define PERF_EVENT_IOC_PERIOD           _IOW('$', 4, __u64)
+#define PERF_EVENT_IOC_SET_OUTPUT       _IO ('$', 5)
+#define PERF_EVENT_IOC_SET_FILTER       _IOW('$', 6, char *)
+#define PERF_EVENT_IOC_SET_REGION       _IOW('$', 7, int)
+#define PERF_EVENT_IOC_GET_REGION       _IOR('$', 8, int)
+#define PERF_EVENT_IOC_REG_REGION		_IOR('$', 10, int)

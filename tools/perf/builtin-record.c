@@ -371,6 +371,12 @@ static int __cmd_record(struct perf_record *rec, int argc, const char **argv)
 	const char *output_name = rec->output_name;
 	struct perf_session *session;
 	bool disabled = false;
+	struct perf_region_definition regions = {
+			.label = NULL,
+			.rd = -1,
+			.list = LIST_HEAD_INIT(regions.list),
+	};
+	opts->target.regions = regions.list;
 
 	rec->progname = argv[0];
 
@@ -610,7 +616,9 @@ static int __cmd_record(struct perf_record *rec, int argc, const char **argv)
 		if (hits == rec->samples) {
 			if (done)
 				break;
+
 			err = poll(evsel_list->pollfd, evsel_list->nr_fds, -1);
+
 			waking++;
 		}
 

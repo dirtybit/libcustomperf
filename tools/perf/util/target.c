@@ -149,3 +149,13 @@ int perf_target__strerror(struct perf_target *target, int errnum,
 
 	return 0;
 }
+
+void perf_target__add_region(struct perf_target *target __maybe_unused, struct perf_region_definition *reg_def __maybe_unused)
+{
+	list_add(&reg_def->list, &target->regions);
+}
+
+void perf_target__del_region(struct perf_target *target __maybe_unused, struct perf_region_definition *reg_def __maybe_unused)
+{
+	list_del(&reg_def->list);
+}

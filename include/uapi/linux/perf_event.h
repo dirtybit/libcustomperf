@@ -318,6 +318,10 @@ struct perf_event_attr {
 #define PERF_EVENT_IOC_PERIOD		_IOW('$', 4, __u64)
 #define PERF_EVENT_IOC_SET_OUTPUT	_IO ('$', 5)
 #define PERF_EVENT_IOC_SET_FILTER	_IOW('$', 6, char *)
+#define PERF_EVENT_IOC_SET_REGION	_IOW('$', 7, int)
+#define PERF_EVENT_IOC_GET_REGION	_IOR('$', 8, int)
+#define PERF_EVENT_IOC_UNSET_REGION	_IO ('$', 9)
+#define PERF_EVENT_IOC_REG_REGION	_IOR('$', 10, int)
 
 enum perf_event_ioc_flags {
 	PERF_IOC_FLAG_GROUP		= 1U << 0,
