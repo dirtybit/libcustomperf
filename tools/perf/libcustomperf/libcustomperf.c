@@ -1,16 +1,17 @@
 #include "libcustomperf.h"
+#include <stdio.h>
 #include <unistd.h>
 #include <stdbool.h>
 
 int perf_send_command(int cmd)
 {
-	bool result = 1;
+	int result = 1;
 	if (write(TARGET_SOCK_FD, &cmd, sizeof(cmd)) == -1)
 		return -1;
 	if (read(TARGET_SOCK_FD, &result, sizeof(result)) == -1)
 		return -1;
 
-	return 0;
+	return result == cmd;
 }
 
 int perf_init_communication()
