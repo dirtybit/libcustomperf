@@ -1,7 +1,14 @@
-CFLAGS := -O3 -L ../ -I ../
+CFLAGS := -L ../ -I ../ -std=c99
 ifneq ($(SELECTIVE), )
- $(info Android)
  CFLAGS += -DSELECTIVE
+endif
+
+ifneq ($(PROFILE), )
+ CFLAGS += -DPROFILE
+endif
+
+ifneq ($(PROFILE_NOSEL), )
+ CFLAGS += -DPROFILE_NOSEL
 endif
 
 LIBS := -lcustomperf -lm

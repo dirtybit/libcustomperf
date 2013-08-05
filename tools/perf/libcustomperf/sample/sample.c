@@ -211,6 +211,7 @@
 #include <stdlib.h>     /* for exit   - 1 occurrence   */
 #include <sys/time.h>
 #include <libcustomperf.h>
+#include <time.h>
 
 #ifdef DP 
 	#define SPDP double
@@ -258,6 +259,8 @@ void what_date()
 	return;
 }
 
+int num_of_startstop = 0;
+
 int main(int argc, char *argv[])
 {
 	int count = 10, calibrate = 1;
@@ -266,6 +269,15 @@ int main(int argc, char *argv[])
 	long x100 = 100;
 	int duration = 100;
 	char general[9][80] = {" "};
+
+#ifdef PROFILE
+	printf("Profile\n");
+	perf_start_monitoring();
+#endif
+
+	if(argc == 2)
+		num_of_startstop = atoi(argv[1]);
+		
 	
 	printf("\n %s Precision C/C++ Whetstone Benchmark\n\n", Precision);
 
@@ -295,7 +307,7 @@ int main(int argc, char *argv[])
 
 	xtra = 2000;
 
-	printf("\nUse %d  passes (x 100)\n", xtra);
+	printf("\nUse %ld  passes (x 100)\n", xtra);
 
 	printf("\n	  %s Precision C/C++ Whetstone Benchmark",Precision);
 	printf("\nLoop content		  Result	         MFLOPS "
@@ -314,6 +326,31 @@ int main(int argc, char *argv[])
      
 	if (Check == 0)
 		printf("Wrong answer  ");
+	
+#ifdef PROFILE
+	printf("Profile\n");
+	perf_stop_monitoring();
+	for(int i = 0; i < num_of_startstop; i++) {
+#ifndef PROFILE_NOSEL
+		/*printf("Start %d ", i);
+		if(!perf_start_monitoring())
+			printf("failed\n");
+		else
+			printf("success\n");
+		printf("Stop %d ", i);
+		if(!perf_stop_monitoring())
+			printf("failed\n");
+		else
+			printf("success\n");
+		*/
+		if (perf_start_monitoring() < 0)
+			printf("Pipe fail\n");
+		if (perf_stop_monitoring() < 0)
+			printf("Pipe fail\n");
+#endif
+	}
+	printf("Start/stop test %d times\n", num_of_startstop);
+#endif
 
 }
 
