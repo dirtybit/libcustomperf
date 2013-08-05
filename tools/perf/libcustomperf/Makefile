@@ -5,7 +5,7 @@ MINOR := 1
 NAME := customperf
 VERSION := $(MAJOR).$(MINOR)
 
-lib: lib$(NAME).so.$(VERSION)
+lib: lib$(NAME).so
 
 lib$(NAME).so: lib$(NAME).so.$(VERSION)
 	ldconfig -v -n .
