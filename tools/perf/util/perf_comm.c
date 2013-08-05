@@ -21,18 +21,14 @@ void *perf_comm__handler(void *arg)
 
 		switch (cmd) {
 		case LIBCUSTOMPERF_INITIALIZE:
-			printf("perf_comm: init communication\n");
 			break;
 		case LIBCUSTOMPERF_START_MONITORING:
 			perf_evlist__enable(evsel_list);
-			printf("perf_comm: start monitoring\n");
 			break;
 		case LIBCUSTOMPERF_STOP_MONITORING:
 			perf_evlist__disable(evsel_list);
-			printf("perf_comm: stop monitoring\n");
 			break;
 		default:
-			printf("perf_comm: nothing\n");
 			break;
 		}
 
