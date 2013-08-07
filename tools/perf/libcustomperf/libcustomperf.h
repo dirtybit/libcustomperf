@@ -10,7 +10,7 @@ enum libcustomperf_messages {
 };
 
 int perf_init_communication(void);
-int perf_start_monitoring(void);
-int perf_stop_monitoring(void);
+int perf_start_monitoring(int);
+int perf_stop_monitoring(int);
 
 #endif
