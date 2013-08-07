@@ -260,6 +260,7 @@ void what_date()
 }
 
 int num_of_startstop = 0;
+int perf_comm_fd;
 
 int main(int argc, char *argv[])
 {
@@ -270,9 +271,13 @@ int main(int argc, char *argv[])
 	int duration = 100;
 	char general[9][80] = {" "};
 
+#if defined(SELECTIVE) || defined(PROFILE)
+	perf_comm_fd = perf_init_communication();
+#endif
+
 #ifdef PROFILE
 	printf("Profile\n");
-	perf_start_monitoring();
+	perf_start_monitoring(perf_comm_fd);
 #endif
 
 	if(argc == 2)
@@ -329,23 +334,23 @@ int main(int argc, char *argv[])
 	
 #ifdef PROFILE
 	printf("Profile\n");
-	perf_stop_monitoring();
+	perf_stop_monitoring(perf_comm_fd);
 	for(int i = 0; i < num_of_startstop; i++) {
 #ifndef PROFILE_NOSEL
 		/*printf("Start %d ", i);
-		if(!perf_start_monitoring())
+		if(!perf_start_monitoring(perf_comm_fd))
 			printf("failed\n");
 		else
 			printf("success\n");
 		printf("Stop %d ", i);
-		if(!perf_stop_monitoring())
+		if(!perf_stop_monitoring(perf_comm_fd))
 			printf("failed\n");
 		else
 			printf("success\n");
 		*/
-		if (perf_start_monitoring() < 0)
+		if (perf_start_monitoring(perf_comm_fd) < 0)
 			printf("Pipe fail\n");
-		if (perf_stop_monitoring() < 0)
+		if (perf_stop_monitoring(perf_comm_fd) < 0)
 			printf("Pipe fail\n");
 #endif
 	}
@@ -416,7 +421,7 @@ void whetstones(long xtra, long x100, int calibrate, int profile)
 
 #ifdef SELECTIVE
 	if(profile)
-		perf_start_monitoring();
+		perf_start_monitoring(perf_comm_fd);
 #endif
 	{
 		for (ix=0; ix<xtra; ix++)
@@ -434,7 +439,7 @@ void whetstones(long xtra, long x100, int calibrate, int profile)
 	}
 #ifdef SELECTIVE
 	if(profile)
-		perf_stop_monitoring();
+		perf_stop_monitoring(perf_comm_fd);
 #endif
 	gettimeofday(&tvEnd, NULL);
 	timeval_subtract(&tvDiff, &tvEnd, &tvBegin);
@@ -464,7 +469,7 @@ void whetstones(long xtra, long x100, int calibrate, int profile)
 
 #ifdef SELECTIVE
 	if(profile)
-		perf_start_monitoring();
+		perf_start_monitoring(perf_comm_fd);
 #endif
 	{
 		for (ix=0; ix<xtra; ix++)
@@ -488,7 +493,7 @@ void whetstones(long xtra, long x100, int calibrate, int profile)
 	}
 #ifdef SELECTIVE
 	if(profile)
-		perf_stop_monitoring();
+		perf_stop_monitoring(perf_comm_fd);
 #endif	
 	
 	gettimeofday(&tvEnd, NULL);
@@ -528,7 +533,7 @@ void whetstones(long xtra, long x100, int calibrate, int profile)
 
 #ifdef SELECTIVE
 	if(profile)
-		perf_start_monitoring();
+		perf_start_monitoring(perf_comm_fd);
 #endif
 	{
 		for (ix=0; ix<xtra; ix++)
@@ -544,7 +549,7 @@ void whetstones(long xtra, long x100, int calibrate, int profile)
 	}
 #ifdef SELECTIVE
 	if(profile)
-		perf_stop_monitoring();
+		perf_stop_monitoring(perf_comm_fd);
 #endif
 	gettimeofday(&tvEnd, NULL);
 	timeval_subtract(&tvDiff, &tvEnd, &tvBegin);
@@ -581,7 +586,7 @@ void whetstones(long xtra, long x100, int calibrate, int profile)
 	gettimeofday(&tvBegin, NULL);
 #ifdef SELECTIVE
 	if(profile)
-		perf_start_monitoring();
+		perf_start_monitoring(perf_comm_fd);
 #endif
 	{
 		for (ix=0; ix<xtra; ix++)
@@ -594,7 +599,7 @@ void whetstones(long xtra, long x100, int calibrate, int profile)
 	}
 #ifdef SELECTIVE
 	if(profile)
-		perf_stop_monitoring();
+		perf_stop_monitoring(perf_comm_fd);
 #endif
 	gettimeofday(&tvEnd, NULL);
 	timeval_subtract(&tvDiff, &tvEnd, &tvBegin);
