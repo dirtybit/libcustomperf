@@ -755,22 +755,33 @@ int perf_evlist__prepare_workload(struct perf_evlist *evlist,
 				  const char *argv[], bool pipe_output,
 				  bool want_signal, bool selective)
 {
-	int child_ready_pipe[2], go_pipe[2], control_socket[2];
+	int child_ready_pipe[2], go_pipe[2];
 	char bf;
 
 	if (selective) {
 		/* dirtybit
 		 * Establish two-way communication channel between perf and the binary through a socket pair
 		 * Keep perf's end to communicate with the binary
-		 * FD of the workload's socket is dupped to a certain descriptor so as to be known in API calls in the workload. (Ugly) !!!This needs to be replaced with a better solution.
 		 */
+		int control_socket[2], perf_comm_fd = -1;
+		char perf_comm_fd_env[4];
+
 		if (socketpair(AF_UNIX, SOCK_STREAM, 0, control_socket) == -1) {
 			perror("failed to create control communication socket");
 			return -1;
 		}
+
 		target->comm_sck = control_socket[0];
-		close(TARGET_SOCK_FD);
-		dup2(control_socket[1], TARGET_SOCK_FD);
+		perf_comm_fd = dup(control_socket[1]);
+		if (perf_comm_fd == -1) {
+			perror("failed to dup socketpair fd");
+			return -1;
+		}
+		sprintf(perf_comm_fd_env, "%d", perf_comm_fd);
+		if (setenv("PERF_COMM_FD", perf_comm_fd_env, 0) == -1) {
+			perror("failed to set PERF_COMM_FD environment variable");
+			return -1;
+		}
 	}
 
 	if (pipe(child_ready_pipe) < 0) {
