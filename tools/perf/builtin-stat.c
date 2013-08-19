@@ -106,7 +106,7 @@ static struct timespec		ref_time;
 static struct cpu_map		*aggr_map;
 static int			(*aggr_get_id)(struct cpu_map *m, int cpu);
 static bool			selective			= false;
-
+static unsigned int             mmap_pages                      = UINT_MAX;
 static volatile int done = 0;
 
 struct perf_stat {
@@ -485,7 +485,23 @@ static int __run_perf_stat(int argc, const char **argv)
 				.evlist = evsel_list,
 				.target = &target
 		};
-		perf_evlist__disable(evsel_list);
+
+		if (perf_evlist__mmap(evsel_list, mmap_pages, false) < 0) {
+			if (errno == EPERM) {
+				pr_err("Permission error mapping pages.\n"
+					"Consider increasing "
+					"/proc/sys/kernel/perf_event_mlock_kb,\n"
+					"or try again with a smaller value of -m/--mmap_pages.\n"
+					"(current value: %d)\n", mmap_pages);
+			} else if (!is_power_of_2(mmap_pages) &&
+				(mmap_pages != UINT_MAX)) {
+				pr_err("--mmap_pages/-m value must be a power of two.");
+			} else {
+				pr_err("failed to mmap with %d (%s)\n", errno, strerror(errno));
+			}
+			return -1;
+		}
+
 		perf_comm__start_handler(&handler_arg);
 	}
 
@@ -1406,6 +1422,8 @@ int cmd_stat(int argc, const char **argv, const char *prefix __maybe_unused)
 			"command to run after to the measured command"),
 	OPT_UINTEGER('I', "interval-print", &interval,
 		    "print counts at regular interval in ms (>= 100)"),
+	OPT_UINTEGER('m', "mmap-pages", &mmap_pages,
+		     "number of mmap data pages"),
 	OPT_SET_UINT(0, "per-socket", &aggr_mode,
 		     "aggregate counts per processor socket", AGGR_SOCKET),
 	OPT_SET_UINT(0, "per-core", &aggr_mode,
@@ -1556,6 +1574,7 @@ int cmd_stat(int argc, const char **argv, const char *prefix __maybe_unused)
 	if (!forever && status != -1 && !interval)
 		print_stat(argc, argv);
 
+	perf_evlist__munmap(evsel_list);
 	perf_evlist__free_stats(evsel_list);
 out_free_maps:
 	perf_evlist__delete_maps(evsel_list);

@@ -26,6 +26,7 @@
 #include "util/cpumap.h"
 #include "util/thread_map.h"
 #include "util/perf_comm.h"
+#include "util/rdpmc.h"
 
 #include <unistd.h>
 #include <sched.h>
@@ -466,6 +467,11 @@ static int __cmd_record(struct perf_record *rec, int argc, const char **argv)
 		}
 	}
 
+	/* list_for_each(pos, &opts->target.delta_points->list) {
+	   point = list_entry(pos, struct perf_delta_point, list);
+	   printf("T: %d \t Val: %ld \t TS: %d.%d\n", point->type, point->counter_value, (int)point->timestamp.tv_sec, (int)point->timestamp.tv_usec); 
+	} */
+
 	if (perf_record__open(rec) != 0) {
 		err = -1;
 		goto out_delete_session;
@@ -589,9 +595,8 @@ static int __cmd_record(struct perf_record *rec, int argc, const char **argv)
 	 *
 	 * (dirtybit) If selective monitoring is enabled, then disable monitoring at startup
 	 */
-	if (!perf_target__none(&opts->target) && !opts->selective) {
+	if (!perf_target__none(&opts->target))
 		perf_evlist__enable(evsel_list);
-	}
 
 	/*
 	 * Let the child rip

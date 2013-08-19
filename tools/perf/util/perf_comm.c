@@ -2,10 +2,28 @@
 #include <time.h>
 #include "evlist.h"
 #include "perf_comm.h"
+#include "rdpmc.h"
 #include "libcustomperf/libcustomperf.h"
 
 pthread_t comm_thread;
 pthread_attr_t comm_thread_attr;
+
+void perf_comm__read_counters(struct perf_target *target, struct perf_evlist *evlist, enum delta_type type)
+{
+	struct perf_delta_point *point;
+	int i;
+
+	for (i = 0; i < evlist->nr_mmaps; i++) {
+		if (evlist->mmap[i].base != NULL) {
+			point = (struct perf_delta_point *) malloc(sizeof(*point));
+			point->type = type;
+			point->counter_value = mmap_read_counter(evlist->mmap[i].base);
+			gettimeofday(&point->timestamp, NULL);
+			list_add(&point->list, &target->delta_points->list);
+			//printf("T: %d \t Val: %ld \t TS: %d.%d\n", point->type, point->counter_value, (int)point->timestamp.tv_sec, (int)point->timestamp.tv_usec);
+		}
+	}
+}
 
 void *perf_comm__handler(void *arg)
 {
@@ -23,10 +41,10 @@ void *perf_comm__handler(void *arg)
 		case LIBCUSTOMPERF_INITIALIZE:
 			break;
 		case LIBCUSTOMPERF_START_MONITORING:
-			perf_evlist__enable(evsel_list);
+			perf_comm__read_counters(handler_arg->target, evsel_list, START);
 			break;
 		case LIBCUSTOMPERF_STOP_MONITORING:
-			perf_evlist__disable(evsel_list);
+			perf_comm__read_counters(handler_arg->target, evsel_list, STOP);
 			break;
 		default:
 			break;
