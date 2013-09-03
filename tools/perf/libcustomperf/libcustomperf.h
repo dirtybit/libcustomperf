@@ -6,11 +6,12 @@
 enum libcustomperf_messages {
 	LIBCUSTOMPERF_INITIALIZE = 0,
 	LIBCUSTOMPERF_START_MONITORING = 1,
-	LIBCUSTOMPERF_STOP_MONITORING = 2
+	LIBCUSTOMPERF_STOP_MONITORING = 2,
+	LIBCUSTOMPERF_GET_FDS = 3
 };
 
 int perf_init_communication(void);
-int perf_start_monitoring(int);
-int perf_stop_monitoring(int);
+void perf_start_monitoring(void);
+void perf_stop_monitoring(void);
 
 #endif
