@@ -782,9 +782,6 @@ int perf_evlist__prepare_workload(struct perf_evlist *evlist,
 			perror("failed to set PERF_COMM_FD environment variable");
 			return -1;
 		}
-
-		target->delta_points = (struct perf_delta_point *) malloc(sizeof(*target->delta_points));
-		INIT_LIST_HEAD(&target->delta_points->list);
 	}
 	else {
 		if (setenv("PERF_COMM_FD", "-1", 0) == -1) {

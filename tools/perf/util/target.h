@@ -3,17 +3,6 @@
 
 #include <stdbool.h>
 #include <sys/types.h>
-#include <linux/list.h>
-#include <util/types.h>
-
-enum delta_type {START, STOP, UNK};
-
-struct perf_delta_point {
-	enum delta_type type;
-	struct timeval timestamp;
-	u64 counter_value;
-	struct list_head list;
-};
 
 struct perf_target {
 	const char   *pid;
@@ -24,7 +13,6 @@ struct perf_target {
 	bool	     system_wide;
 	bool	     uses_mmap;
 	int          comm_sck;
-	struct perf_delta_point *delta_points;
 };
 
 enum perf_target_errno {

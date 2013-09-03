@@ -483,7 +483,8 @@ static int __run_perf_stat(int argc, const char **argv)
 	if (selective){
 		struct perf_handler_arg handler_arg = {
 				.evlist = evsel_list,
-				.target = &target
+				.target = &target,
+				.pages = mmap_pages
 		};
 
 		if (perf_evlist__mmap(evsel_list, mmap_pages, false) < 0) {

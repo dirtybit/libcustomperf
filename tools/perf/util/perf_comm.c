@@ -1,27 +1,64 @@
 #include <stdio.h>
 #include <time.h>
+#include "cpumap.h"
+#include "thread_map.h"
 #include "evlist.h"
+#include "evsel.h"
 #include "perf_comm.h"
-#include "rdpmc.h"
 #include "libcustomperf/libcustomperf.h"
+
+#define FD(e, x, y) (*(int *)xyarray__entry(e->fd, x, y))
 
 pthread_t comm_thread;
 pthread_attr_t comm_thread_attr;
 
-void perf_comm__read_counters(struct perf_target *target, struct perf_evlist *evlist, enum delta_type type)
+void send_fds(int fd, struct perf_evlist *evlist, int pages)
 {
-	struct perf_delta_point *point;
-	int i;
+	struct perf_evsel *evsel;
+	int thread;
+	int nr_threads = thread_map__nr(evlist->threads);
+	int cntr_fd;
+	
+	if (write(fd, &pages, sizeof(pages)) == -1) {
+		perror("Can't write num of fd to workload");
+		return;
+	}
 
-	for (i = 0; i < evlist->nr_mmaps; i++) {
-		if (evlist->mmap[i].base != NULL) {
-			point = (struct perf_delta_point *) malloc(sizeof(*point));
-			point->type = type;
-			point->counter_value = mmap_read_counter(evlist->mmap[i].base);
-			gettimeofday(&point->timestamp, NULL);
-			list_add(&point->list, &target->delta_points->list);
-			//printf("T: %d \t Val: %ld \t TS: %d.%d\n", point->type, point->counter_value, (int)point->timestamp.tv_sec, (int)point->timestamp.tv_usec);
+	if (cpu_map__all(evlist->cpus)) {
+
+		for (thread = 0; thread < nr_threads; thread++) {
+			list_for_each_entry(evsel, &evlist->entries, node) {
+				cntr_fd = FD(evsel, 0, thread);
+				if (write(fd, &cntr_fd, sizeof(cntr_fd)) == -1) {
+					perror("Can't write fd to workload");
+					return;
+				}
+				else
+					printf("FD written %d\n", cntr_fd);
+			}
 		}
+	}
+	else {
+		int cpu;
+		int nr_cpus = cpu_map__nr(evlist->cpus);
+
+		for (cpu = 0; cpu < nr_cpus; cpu++) {
+			for (thread = 0; thread < nr_threads; thread++) {
+				list_for_each_entry(evsel, &evlist->entries, node) {
+					cntr_fd = FD(evsel, cpu, thread);
+					if (write(fd, &cntr_fd, sizeof(cntr_fd)) == -1) {
+						perror("Can't write fd to workload");
+						return;
+					}
+				}
+			}
+		}
+	}
+
+	cntr_fd = -1;
+	if (write(fd, &cntr_fd, sizeof(cntr_fd)) == -1) {
+		perror("Can't write fd to workload");
+		return;
 	}
 }
 
@@ -37,23 +74,28 @@ void *perf_comm__handler(void *arg)
 			return NULL;
 		}
 
+		if (write(fd, &cmd, sizeof(cmd)) == -1) {
+			perror("Can't write respond to workload");
+			return NULL;
+		}
+
 		switch (cmd) {
 		case LIBCUSTOMPERF_INITIALIZE:
 			break;
 		case LIBCUSTOMPERF_START_MONITORING:
-			perf_comm__read_counters(handler_arg->target, evsel_list, START);
+			//perf_comm__read_counters(handler_arg->target, evsel_list, START);
 			break;
 		case LIBCUSTOMPERF_STOP_MONITORING:
-			perf_comm__read_counters(handler_arg->target, evsel_list, STOP);
+			//perf_comm__read_counters(handler_arg->target, evsel_list, STOP);
+			break;
+		case LIBCUSTOMPERF_GET_FDS:
+			send_fds(fd, evsel_list, handler_arg->pages);
+			//perf_comm__read_counters(handler_arg->target, evsel_list, STOP);
 			break;
 		default:
 			break;
 		}
 
-		if (write(fd, &cmd, sizeof(cmd)) == -1) {
-			perror("Can't write respond to workload");
-			return NULL;
-		}
 	}
 	return 0;
 }

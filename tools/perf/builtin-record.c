@@ -26,7 +26,6 @@
 #include "util/cpumap.h"
 #include "util/thread_map.h"
 #include "util/perf_comm.h"
-#include "util/rdpmc.h"
 
 #include <unistd.h>
 #include <sched.h>
@@ -461,7 +460,8 @@ static int __cmd_record(struct perf_record *rec, int argc, const char **argv)
 		if (opts->selective) {
 			struct perf_handler_arg handler_arg = {
 					.evlist = rec->evlist,
-					.target = &opts->target
+					.target = &opts->target,
+					.pages = opts->mmap_pages
 			};
 			perf_comm__start_handler(&handler_arg);
 		}
