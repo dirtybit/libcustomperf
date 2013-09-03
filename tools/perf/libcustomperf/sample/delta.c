@@ -24,19 +24,17 @@ int main(int argc, char *argv[])
 	int perf_fd;
 
 
-	perf_fd = perf_init_communication();
+	perf_init_communication();
 
 	printf("FD: %d\n", perf_fd);
 
 	for(i = 0; i < 5; i++) {
 		printf("i = %d\n", i);
-		if(perf_fd)
-			perf_start_monitoring(perf_fd);
+		perf_start_monitoring();
 
 		sleep(i);
 
-		if(perf_fd)
-			perf_stop_monitoring(perf_fd);
+		perf_stop_monitoring();
 	}
 
 
