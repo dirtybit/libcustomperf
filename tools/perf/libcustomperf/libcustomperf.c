@@ -24,7 +24,7 @@ struct perf_counter_mmap {
 };
 
 static struct perf_counter_mmap *counters;
-static int pages;
+static unsigned int pages;
 static int sock_fd;
 
 void perf_read_counters(enum delta_type type)
@@ -35,7 +35,6 @@ void perf_read_counters(enum delta_type type)
 	list_for_each_entry(counter, &counters->list, list) {
 		point = (struct perf_delta_point *) malloc(sizeof(*point));
 		point->type = type;
-		printf("READ COUNTER FD %d ", counter->fd);
 		point->counter_value = mmap_read_counter(counter->mmap_base);
 		gettimeofday(&point->timestamp, NULL);
 		list_add(&point->list, &counter->deltas->list);
@@ -108,7 +107,6 @@ int perf_mmap_counters()
 		}
 
 		counter->mmap_base = base;
-		printf("MMAP FD %d\n", counter->fd);
 	}
 
 	return 0;
@@ -124,7 +122,7 @@ unmap:
 	return -1;
 }
 
-int perf_init_communication()
+int perf_init()
 {
 	char *perf_comm_fd_env = getenv("PERF_COMM_FD");
 
@@ -144,6 +142,13 @@ int perf_init_communication()
 
 		return 0;
 	}
+}
+
+int perf_finalize()
+{
+	// TODO: This function communicates back the collected delta information to the perf.
+
+	return 0;
 }
 
 void perf_start_monitoring()

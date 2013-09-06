@@ -447,6 +447,12 @@ static int __cmd_record(struct perf_record *rec, int argc, const char **argv)
 			goto out_delete_session;
 	}
 
+	if (perf_record__open(rec) != 0) {
+		err = -1;
+		goto out_delete_session;
+	}
+
+
 	if (forks) {
 		err = perf_evlist__prepare_workload(evsel_list, &opts->target,
 						    argv, opts->pipe_output,
@@ -458,23 +464,20 @@ static int __cmd_record(struct perf_record *rec, int argc, const char **argv)
 
 		/* dirtybit: Dispatch a thread to listen API calls coming from the workload */
 		if (opts->selective) {
+			unsigned int pages = opts->mmap_pages;
 			struct perf_handler_arg handler_arg = {
 					.evlist = rec->evlist,
-					.target = &opts->target,
-					.pages = opts->mmap_pages
+					.target = &opts->target
 			};
+
+			if (pages == UINT_MAX)
+				pages = (512 * 1024) / page_size;
+			else if (!is_power_of_2(pages))
+				pages = -1;
+
+			handler_arg.pages = pages;
 			perf_comm__start_handler(&handler_arg);
 		}
-	}
-
-	/* list_for_each(pos, &opts->target.delta_points->list) {
-	   point = list_entry(pos, struct perf_delta_point, list);
-	   printf("T: %d \t Val: %ld \t TS: %d.%d\n", point->type, point->counter_value, (int)point->timestamp.tv_sec, (int)point->timestamp.tv_usec); 
-	} */
-
-	if (perf_record__open(rec) != 0) {
-		err = -1;
-		goto out_delete_session;
 	}
 
 	if (!evsel_list->nr_groups)

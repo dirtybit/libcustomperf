@@ -10,7 +10,8 @@ enum libcustomperf_messages {
 	LIBCUSTOMPERF_GET_FDS = 3
 };
 
-int perf_init_communication(void);
+int perf_init(void);
+int perf_finalize(void);
 void perf_start_monitoring(void);
 void perf_stop_monitoring(void);
 

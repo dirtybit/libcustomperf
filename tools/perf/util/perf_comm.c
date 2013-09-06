@@ -12,7 +12,7 @@
 pthread_t comm_thread;
 pthread_attr_t comm_thread_attr;
 
-void send_fds(int fd, struct perf_evlist *evlist, int pages)
+void send_fds(int fd, struct perf_evlist *evlist, unsigned int pages)
 {
 	struct perf_evsel *evsel;
 	int thread;
