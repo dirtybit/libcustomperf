@@ -33,8 +33,6 @@ void send_fds(int fd, struct perf_evlist *evlist, unsigned int pages)
 					perror("Can't write fd to workload");
 					return;
 				}
-				else
-					printf("FD written %d\n", cntr_fd);
 			}
 		}
 	}
