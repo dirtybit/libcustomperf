@@ -435,13 +435,7 @@ static int __run_perf_stat(int argc, const char **argv)
 		ts.tv_nsec = 0;
 	}
 
-	if (forks) {
-		if (perf_evlist__prepare_workload(evsel_list, &target, argv,
-						  false, false, selective) < 0) {
-			perror("failed to prepare workload");
-			return -1;
-		}
-	}
+
 
 	if (group)
 		perf_evlist__set_leader(evsel_list);
@@ -480,13 +474,8 @@ static int __run_perf_stat(int argc, const char **argv)
 		return -1;
 	}
 
-	if (selective){
-		struct perf_handler_arg handler_arg = {
-				.evlist = evsel_list,
-				.target = &target,
-				.pages = mmap_pages
-		};
 
+	if (selective) {
 		if (perf_evlist__mmap(evsel_list, mmap_pages, false) < 0) {
 			if (errno == EPERM) {
 				pr_err("Permission error mapping pages.\n"
@@ -500,9 +489,29 @@ static int __run_perf_stat(int argc, const char **argv)
 			} else {
 				pr_err("failed to mmap with %d (%s)\n", errno, strerror(errno));
 			}
+		}
+	}
+
+	if (forks) {
+		if (perf_evlist__prepare_workload(evsel_list, &target, argv,
+						  false, false, selective) < 0) {
+			perror("failed to prepare workload");
 			return -1;
 		}
+	}
 
+	if (selective) {
+		struct perf_handler_arg handler_arg = {
+				.evlist = evsel_list,
+				.target = &target
+		};
+
+		if (mmap_pages == UINT_MAX)
+			mmap_pages = (512 * 1024) / page_size;
+		else if (!is_power_of_2(mmap_pages))
+			mmap_pages = -1;
+
+		handler_arg.pages = mmap_pages;
 		perf_comm__start_handler(&handler_arg);
 	}
 
