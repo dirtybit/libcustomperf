@@ -1,27 +1,8 @@
 #include "libcustomperf.h"
 #include <stdio.h>
-#include <stdlib.h>
 #include <sys/time.h>
 #include <sys/mman.h>
 #include <unistd.h>
-#include <util/list.h>
-#include "rdpmc.h"
-
-enum delta_type {START, STOP, UNK};
-
-struct perf_delta_point {
-	enum delta_type type;
-	struct timeval timestamp;
-	u64 counter_value;
-	struct list_head list;
-};
-
-struct perf_counter_mmap {
-	int fd;
-	void *mmap_base;
-	struct perf_delta_point *deltas;
-	struct list_head list;
-};
 
 static struct perf_counter_mmap *counters;
 static unsigned int pages;
