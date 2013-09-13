@@ -11,14 +11,20 @@ static int sock_fd;
 void perf_read_counters(enum delta_type type)
 {
 	struct perf_counter_mmap *counter;
-	struct perf_delta_point *point;
 
 	list_for_each_entry(counter, &counters->list, list) {
-		point = (struct perf_delta_point *) malloc(sizeof(*point));
-		point->type = type;
-		point->counter_value = mmap_read_counter(counter->mmap_base);
-		gettimeofday(&point->timestamp, NULL);
-		list_add(&point->list, &counter->deltas->list);
+		u64 value = mmap_read_counter(counter->mmap_base);
+		if (counter->fd == 7) {
+			printf("Type: %d -  Value: %ld\n", type, value);
+			if (type == START) {
+				counter->last_start = value;
+			} else if (type == STOP) {
+				printf("Counter FD %d - Begin: %ld\tEnd: %ld\t", counter->fd, counter->last_start, value);
+				value -= counter->last_start;
+				printf("Delta %ld\n", value);
+				counter->accumulate += value;
+			}
+		}
 	}
 }
 
@@ -64,8 +70,8 @@ int perf_get_cntr_fds(int fd)
 
 		counter = (struct perf_counter_mmap *) malloc(sizeof(*counter));
 		counter->fd = cntr_fd;
-		counter->deltas = (struct perf_delta_point *) malloc(sizeof(*counter->deltas));
-		INIT_LIST_HEAD(&counter->deltas->list);
+		counter->last_start = 0;
+		counter->accumulate = 0;
 		list_add(&counter->list, &counters->list);
 	}
 
@@ -128,6 +134,12 @@ int perf_init()
 int perf_finalize()
 {
 	// TODO: This function communicates back the collected delta information to the perf.
+
+	struct perf_counter_mmap *counter;
+
+	list_for_each_entry(counter, &counters->list, list) {
+		printf("Counter FD: %d\tValue: %ld\n", counter->fd, counter->accumulate);
+	}
 
 	return 0;
 }

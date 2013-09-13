@@ -15,17 +15,11 @@ enum libcustomperf_messages {
 
 enum delta_type {START, STOP, UNK};
 
-struct perf_delta_point {
-	enum delta_type type;
-	struct timeval timestamp;
-	u64 counter_value;
-	struct list_head list;
-};
-
 struct perf_counter_mmap {
 	int fd;
 	void *mmap_base;
-	struct perf_delta_point *deltas;
+	u64 last_start;
+	u64 accumulate;
 	struct list_head list;
 };
 
