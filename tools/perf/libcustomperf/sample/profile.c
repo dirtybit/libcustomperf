@@ -21,9 +21,7 @@ int main(int argc, char *argv[])
 	
 	for(int i = 0; i < num_of_startstop; i++) {
 		perf_start_monitoring();
-		usleep(1000000);
 		perf_stop_monitoring();
-		usleep(1000000);
 	}
 	printf("Start/stop test %d times\n", num_of_startstop*2);
 

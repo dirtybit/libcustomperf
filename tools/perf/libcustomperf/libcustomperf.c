@@ -15,13 +15,10 @@ void perf_read_counters(enum delta_type type)
 	list_for_each_entry(counter, &counters->list, list) {
 		u64 value = mmap_read_counter(counter->mmap_base);
 		if (counter->fd == 7) {
-			printf("Type: %d -  Value: %ld\n", type, value);
 			if (type == START) {
 				counter->last_start = value;
 			} else if (type == STOP) {
-				printf("Counter FD %d - Begin: %ld\tEnd: %ld\t", counter->fd, counter->last_start, value);
 				value -= counter->last_start;
-				printf("Delta %ld\n", value);
 				counter->accumulate += value;
 			}
 		}
@@ -135,11 +132,11 @@ int perf_finalize()
 {
 	// TODO: This function communicates back the collected delta information to the perf.
 
-	struct perf_counter_mmap *counter;
+	/* struct perf_counter_mmap *counter; */
 
-	list_for_each_entry(counter, &counters->list, list) {
-		printf("Counter FD: %d\tValue: %ld\n", counter->fd, counter->accumulate);
-	}
+	/* list_for_each_entry(counter, &counters->list, list) { */
+	/* 	printf("Counter FD: %d\tValue: %ld\n", counter->fd, counter->accumulate); */
+	/* } */
 
 	return 0;
 }
