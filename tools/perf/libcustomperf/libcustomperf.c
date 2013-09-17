@@ -14,13 +14,11 @@ void perf_read_counters(enum delta_type type)
 
 	list_for_each_entry(counter, &counters->list, list) {
 		u64 value = mmap_read_counter(counter->mmap_base);
-		if (counter->fd == 7) {
-			if (type == START) {
-				counter->last_start = value;
-			} else if (type == STOP) {
-				value -= counter->last_start;
-				counter->accumulate += value;
-			}
+		if (type == START) {
+			counter->last_start = value;
+		} else if (type == STOP) {
+			value -= counter->last_start;
+			counter->accumulate += value;
 		}
 	}
 }
