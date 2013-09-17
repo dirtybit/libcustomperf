@@ -1,21 +1,12 @@
 #!/bin/bash
-for i in 10 100 1000 10000 100000
+for i in 0 10000 50000 100000 500000 1000000 5000000 10000000
 do
     for j in {1..5}
     do
-	echo "sample_profile_nosel $i times run $j"
-	sudo LD_LIBRARY_PATH=../ ../../build/perf stat -e cycles,instructions -as ./sample_profile_nosel $i > /dev/null 2> ./results/profile_nosel_${i}_${j}.out
-	echo "sample_profile $i times run $j"
-	sudo LD_LIBRARY_PATH=../ ../../build/perf stat -e cycles,instructions -as ./sample_profile $i > /dev/null 2> ./results/profile_${i}_${j}.out
+	echo "profile $i times run $j"
+	sudo LD_LIBRARY_PATH=../ ../../build/perf stat -e cycles,instructions -as ./sample $i > /dev/null 2> ./results/profile_${i}_${j}.out
     done
 done
-
-for i in {1..5}
-do
-    echo "sample run $j"
-    sudo LD_LIBRARY_PATH=../ ../../build/perf stat -e cycles,instructions -a ./sample 2> ./results/sample_${i}.out > /dev/null
-done
-
 
 # sudo LD_LIBRARY_PATH=../ ../../build/perf stat -e cycles,instructions -as ./sample_profile_nosel 10000
 

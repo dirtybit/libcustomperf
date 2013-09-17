@@ -281,7 +281,7 @@ int main(int argc, char *argv[])
 #endif
 
 	if(argc == 2)
-		num_of_startstop = atoi(argv[1]);
+		num_of_startstop = atoi(argv[1])/2;
 		
 	
 	printf("\n %s Precision C/C++ Whetstone Benchmark\n\n", Precision);
@@ -354,7 +354,7 @@ int main(int argc, char *argv[])
 			printf("Pipe fail\n");
 #endif
 	}
-	printf("Start/stop test %d times\n", num_of_startstop);
+	printf("Start/stop test %d times\n", num_of_startstop*2);
 #endif
 
 }
