@@ -12,6 +12,10 @@
 pthread_t comm_thread;
 pthread_attr_t comm_thread_attr;
 
+/*
+ * dirtybit:
+ * This sends counter file descriptors to libcustomperf over socket connection
+ */
 void send_fds(int fd, struct perf_evlist *evlist, unsigned int pages)
 {
 	struct perf_evsel *evsel;
@@ -60,6 +64,10 @@ void send_fds(int fd, struct perf_evlist *evlist, unsigned int pages)
 	}
 }
 
+/*
+ * dirtybit:
+ * Main function of the handler thread. Receives requests and responds them accordingly
+ */
 void *perf_comm__handler(void *arg)
 {
 	int cmd = -918;
@@ -78,17 +86,8 @@ void *perf_comm__handler(void *arg)
 		}
 
 		switch (cmd) {
-		case LIBCUSTOMPERF_INITIALIZE:
-			break;
-		case LIBCUSTOMPERF_START_MONITORING:
-			//perf_comm__read_counters(handler_arg->target, evsel_list, START);
-			break;
-		case LIBCUSTOMPERF_STOP_MONITORING:
-			//perf_comm__read_counters(handler_arg->target, evsel_list, STOP);
-			break;
 		case LIBCUSTOMPERF_GET_FDS:
 			send_fds(fd, evsel_list, handler_arg->pages);
-			//perf_comm__read_counters(handler_arg->target, evsel_list, STOP);
 			break;
 		default:
 			break;
@@ -98,6 +97,10 @@ void *perf_comm__handler(void *arg)
 	return 0;
 }
 
+/*
+ * dirtybit:
+ * Creates and dispatches handler thread.
+ */
 int perf_comm__start_handler(struct perf_handler_arg *arg)
 {
 	int rc;
@@ -108,10 +111,5 @@ int perf_comm__start_handler(struct perf_handler_arg *arg)
 		printf("ERROR; return code from pthread_create() is %d\n", rc);
 		return -1;
 	}
-	return 0;
-}
-
-int perf_comm__terminate_handler(void)
-{
 	return 0;
 }

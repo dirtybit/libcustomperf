@@ -475,6 +475,12 @@ static int __run_perf_stat(int argc, const char **argv)
 	}
 
 
+	/*
+	 * dirtybit:
+	 * If pages are not mmaped to counter fds, target's attemps to map pages to these fds
+	 * result in 'Bad file descriptor' error.
+	 * Call evlist mmap function here to prevent this problem.
+	 */
 	if (selective) {
 		if (perf_evlist__mmap(evsel_list, mmap_pages, false) < 0) {
 			if (errno == EPERM) {
@@ -500,6 +506,11 @@ static int __run_perf_stat(int argc, const char **argv)
 		}
 	}
 
+	/*
+	 * dirtybit:
+	 * If selective monitoring is enabled, dispatch perf_comm handler thread
+	 * to listen to requests made through libcustomperf
+	 */
 	if (selective) {
 		struct perf_handler_arg handler_arg = {
 				.evlist = evsel_list,

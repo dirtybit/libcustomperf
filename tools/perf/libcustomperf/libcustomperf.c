@@ -8,6 +8,14 @@ static struct perf_counter_mmap *counters;
 static unsigned int pages;
 static int sock_fd;
 
+/*
+ * dirtybit:
+ * This function read the PMC for each counter.
+ * It does its job according to the type of command (START or STOP)
+ * If start, keep the PMC value as initial number
+ * Otherwise, calculate delta between initial and final value and
+ * accumulate it to the sum.
+*/
 void perf_read_counters(enum delta_type type)
 {
 	struct perf_counter_mmap *counter;
@@ -23,6 +31,10 @@ void perf_read_counters(enum delta_type type)
 	}
 }
 
+/*
+ * dirtybit:
+ * This functions is to send command to perf over socket connetion
+ */
 int perf_send_command(int fd, int cmd)
 {
 	int result = -1;
@@ -39,6 +51,10 @@ int perf_send_command(int fd, int cmd)
 	return result == cmd;
 }
 
+/*
+ * dirtybit:
+ * This functions reads counter file descriptors from perf
+ */
 int perf_get_cntr_fds(int fd)
 {
 	int cntr_fd = -1;
@@ -73,6 +89,10 @@ int perf_get_cntr_fds(int fd)
 	return 0;
 }
 
+/*
+ * dirtybit:
+ * This maps pages for each counter's file descriptor
+ */
 int perf_mmap_counters()
 {
 	struct perf_counter_mmap *counter;
@@ -104,6 +124,10 @@ unmap:
 	return -1;
 }
 
+/*
+ * dirtybit:
+ * This initializes the libcustomperf and establishes a connection between * perf and itself.
+ */
 int perf_init()
 {
 	char *perf_comm_fd_env = getenv("PERF_COMM_FD");
@@ -124,19 +148,6 @@ int perf_init()
 
 		return 0;
 	}
-}
-
-int perf_finalize()
-{
-	// TODO: This function communicates back the collected delta information to the perf.
-
-	/* struct perf_counter_mmap *counter; */
-
-	/* list_for_each_entry(counter, &counters->list, list) { */
-	/* 	printf("Counter FD: %d\tValue: %ld\n", counter->fd, counter->accumulate); */
-	/* } */
-
-	return 0;
 }
 
 void perf_start_monitoring()

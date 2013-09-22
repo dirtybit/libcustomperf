@@ -6,11 +6,7 @@
 #include <stdlib.h>
 
 enum libcustomperf_messages {
-	LIBCUSTOMPERF_INITIALIZE = 0,
-	LIBCUSTOMPERF_START_MONITORING = 1,
-	LIBCUSTOMPERF_STOP_MONITORING = 2,
-	LIBCUSTOMPERF_GET_FDS = 3,
-	LIBCUSTOMPERF_SEND_DELTAS = 4
+	LIBCUSTOMPERF_GET_FDS = 0
 };
 
 enum delta_type {START, STOP, UNK};
@@ -24,7 +20,6 @@ struct perf_counter_mmap {
 };
 
 int perf_init(void);
-int perf_finalize(void);
 void perf_start_monitoring(void);
 void perf_stop_monitoring(void);
 

@@ -4,6 +4,11 @@
 
 #define barrier() asm volatile("" ::: "memory")
 
+/*
+ * dirtybit:
+ * Functions needed to read the PMC using mapped pages of counters.
+ */
+
 static u64 rdpmc(unsigned int counter)
 {
 	unsigned int low, high;

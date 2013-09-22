@@ -6,7 +6,6 @@
  * later analysis via perf report.
  */
 #include "builtin.h"
-#include "builtin-record.h"
 
 #include "perf.h"
 
@@ -62,6 +61,32 @@ static void __handle_on_exit_funcs(void)
 		__on_exit_funcs[i] (__exitcode, __on_exit_args[i]);
 }
 #endif
+
+enum write_mode_t {
+	WRITE_FORCE,
+	WRITE_APPEND
+};
+
+struct perf_record {
+	struct perf_tool	tool;
+	struct perf_record_opts	opts;
+	u64			bytes_written;
+	const char		*output_name;
+	struct perf_evlist	*evlist;
+	struct perf_session	*session;
+	const char		*progname;
+	int			output;
+	unsigned int		page_size;
+	int			realtime_prio;
+	enum write_mode_t	write_mode;
+	bool			no_buildid;
+	bool			no_buildid_cache;
+	bool			force;
+	bool			file_new;
+	bool			append_file;
+	long			samples;
+	off_t			post_processing_offset;
+};
 
 static void advance_output(struct perf_record *rec, size_t size)
 {
@@ -462,7 +487,11 @@ static int __cmd_record(struct perf_record *rec, int argc, const char **argv)
 			goto out_delete_session;
 		}
 
-		/* dirtybit: Dispatch a thread to listen API calls coming from the workload */
+		/*
+		 * dirtybit:
+		 * If selective monitoring is enabled, dispatch perf_comm handler thread
+		 * to listen to requests made through libcustomperf
+		 */
 		if (opts->selective) {
 			unsigned int pages = opts->mmap_pages;
 			struct perf_handler_arg handler_arg = {
@@ -595,8 +624,6 @@ static int __cmd_record(struct perf_record *rec, int argc, const char **argv)
 	 * When perf is starting the traced process, all the events
 	 * (apart from group members) have enable_on_exec=1 set,
 	 * so don't spoil it by prematurely enabling them.
-	 *
-	 * (dirtybit) If selective monitoring is enabled, then disable monitoring at startup
 	 */
 	if (!perf_target__none(&opts->target))
 		perf_evlist__enable(evsel_list);
